@@ -25,3 +25,11 @@ Il libretto conterrà le seguenti informazioni:
 	- voto
 	- data
 - il libretto dovrà anche restituire informazioni aggregate sugli esami svolti, come la media
+
+
+--------------------------------------------------
+# TODO
+- arbitrary arguments, difference between * and **
+- split people in houses, and build the class School
+- class voto and libretto
+- method to compute media
