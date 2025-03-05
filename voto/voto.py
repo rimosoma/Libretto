@@ -28,8 +28,46 @@ class Libretto:
         for v in self.voti:
             mystr += f"{v} \n"
         return mystr
+
     def __len__(self):
         return len(self.voti)
+
+    def calcolaMedia(self):
+        """
+        restituisce la media dei voti presenti nel punteggio
+        :return: valore numerico della media oppure ValueError se la lista è vuota
+        """
+        if len(self.voti) == 0:
+            raise ValueError("Attenzione, lista esami vuota")
+        voti = [v.punteggio for v in self.voti]    #crea una nuova lista fatta dai punteggi(voti interi)
+        return sum(voti) / len(voti)                #potrei fare math.mean(voti)
+
+
+    def getVotiByPunti(self, punti, lode):
+        """
+        Filtra i voti in base al punteggio in input
+        :param punti: variabile di tipo intero che rappresenta il puntrggio
+        :param lode: variabile booleana che indica la presenza della lode
+        :return:lista di voti corrispondenti ai parametri
+        """
+        votiFiltrati = []
+        for v in self.voti:
+            if v.punteggio == punti and v.lode == lode:
+                votiFiltrati.append(v)                  #posso fare l'opzione append con il voto perche è un dataclass
+        return votiFiltrati                                #altrimenti dovrei fare il metodo __
+
+    def getVotoByName(self, nome):
+        """
+        restituisce oggetto voto con campo materia uguale al nome in input
+        :param nome: nome della materia
+        :return: oggetto di tipo voto
+        """
+        for v in self.voti:
+            if v.materia == nome:
+                return v
+
+
+
 
 def testVoto():
     print("Ho usato Voto in maniera standalone")
