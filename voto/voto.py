@@ -1,5 +1,6 @@
+import math
 from dataclasses import dataclass
-
+import flet
 cfuTot = 180
 
 @dataclass
@@ -9,11 +10,25 @@ class Voto:
     data: str
     lode: bool
 
+
+    #definisco il metodo toString
     def __str__(self):
         if self.lode:
             return f"In {self.materia} hai preso {self.punteggio} e lode il {self.data}"
         else:
             return f"In {self.materia} hai preso {self.punteggio} il {self.data}"
+
+    #definisco il metodo equals tra voti
+    def __eq__(self, other):
+        if self.materia == other.materia and self.punteggio == other.punteggio and self.lode == other.lode and self.data == other.data:
+            return True
+
+    #definisco il metodo equals che controlla solo voto e materia
+    def ugualeMateriaAndPunteggio(self, other):
+        if self.materia == other.materia and self.punteggio == other.punteggio:
+            return True
+        else:
+            return False
 
 class Libretto:
     def __init__(self, proprietario, voti = []):
@@ -21,7 +36,11 @@ class Libretto:
         self.voti = voti
 
     def append(self, voto): # duck!
-        self.voti.append(voto)
+        if self.votoGiaPresente(voto) == False:
+            self.voti.append(voto)
+        else:
+            print(f"il voto di {voto.materia} in cui ha preso {voto.punteggio} è gia registrato")
+
 
     def __str__(self):
         mystr = f"Libretto voti di {self.proprietario} \n"
@@ -66,6 +85,17 @@ class Libretto:
             if v.materia == nome:
                 return v
 
+    def votoGiaPresente(self, votoCercato):
+        presente = False
+        for v in self.voti:
+            if v.ugualeMateriaAndPunteggio(votoCercato):
+                presente = True
+        if presente:
+            print(f"Voto presente nel libretto : {votoCercato}")
+        else:
+            print(f"il voto di {votoCercato.materia} in cui avrebbe preso {votoCercato.punteggio} non è presente nel libretto ")
+
+        return presente
 
 
 
@@ -80,6 +110,8 @@ def testVoto():
     print(mylib)
     mylib.append(v3)
     print(mylib)
+
+
 
 if __name__ == "__main__":
     testVoto()
