@@ -49,3 +49,33 @@ mylib.votoGiaPresente(vNonPres)
 
 #provo a inserire un voto duplicato nel libretto
 mylib.append(v10doppio)
+
+#provo a inserire un voto con stesso nome ma punteggio diverso
+print(mylib.hasConflitto(Voto("Difesa contro le arti oscure", 21, "2022-01-30", False)))
+
+#provo il nuovo libretto migliorato
+print("---------------------------------------------------------------------------")
+print("LIBRETTO ORIGINARIO")
+print(mylib)
+print("")
+print("LIBRETTO MIGLIORATO")
+nuovoLibretto = mylib.creaMigliorato()
+print(nuovoLibretto)
+
+
+#testo l'ordinamento
+print("-------------------------------------------------------------------------------")
+print("LIBRETTO ORDINATO PER MATERIA")
+ordinato = mylib.creaLibrOrdinatoPermateria()
+print(ordinato)
+
+print("-------------------------------------------------------------------------------")
+print("LIBRETTO ORDINATO PER VOTO")
+ordinato2 = mylib.creaLibrOrdinatoPerVoto()
+print(ordinato2)
+
+print("------------------------------------------------------------------------------")
+print("LIBRETTO A CUI ELIMINO I VOTI INFERIORI DI 24")
+ordinato2.cancellaInferiori(24)
+print(ordinato2)
+

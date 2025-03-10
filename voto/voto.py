@@ -1,9 +1,11 @@
 import math
+import operator
 from dataclasses import dataclass
 import flet
 cfuTot = 180
 
-@dataclass
+#order = true significa che una lista di voti sarebbe ordinabile
+@dataclass(order=True)
 class Voto:
     materia: str
     punteggio: int
@@ -23,12 +25,15 @@ class Voto:
         if self.materia == other.materia and self.punteggio == other.punteggio and self.lode == other.lode and self.data == other.data:
             return True
 
+    def copy(self):
+        return Voto(self.materia, self.punteggio, self.data, self.lode)
+
     #definisco il metodo equals che controlla solo voto e materia
     def ugualeMateriaAndPunteggio(self, other):
-        if self.materia == other.materia and self.punteggio == other.punteggio:
-            return True
-        else:
-            return False
+        return (self.materia == other.materia and
+                self.punteggio == other.punteggio and
+                self.lode == other.lode)
+
 
 class Libretto:
     def __init__(self, proprietario, voti = []):
@@ -50,6 +55,17 @@ class Libretto:
 
     def __len__(self):
         return len(self.voti)
+
+    #questa è una deep copy
+    def copy(self):
+        """
+        crea una nuova copia del libretto
+        :return:
+        """
+        nuovo = Libretto(self.proprietario, [])
+        for v in self.voti:
+            nuovo.append(v.copy())
+        return nuovo
 
     def calcolaMedia(self):
         """
@@ -86,17 +102,125 @@ class Libretto:
                 return v
 
     def votoGiaPresente(self, votoCercato):
+        """
+        verifica se il libretto contiene gia il voto, l'uguaglianza si ha in base al campo materia e punteggio
+        :param votoCercato:
+        :return:
+        """
         presente = False
         for v in self.voti:
             if v.ugualeMateriaAndPunteggio(votoCercato):
                 presente = True
-        if presente:
-            print(f"Voto presente nel libretto : {votoCercato}")
-        else:
-            print(f"il voto di {votoCercato.materia} in cui avrebbe preso {votoCercato.punteggio} non è presente nel libretto ")
+        #if presente:
+           # print(f"Voto presente nel libretto : {votoCercato}")
+        #else:
+            #print(f"il voto di {votoCercato.materia} in cui avrebbe preso {votoCercato.punteggio} non è presente nel libretto ")
 
         return presente
 
+    def hasConflitto(self, votoConfronto):
+        """
+        controlla che la coppia di voti non sia in conflitto cioe stessa materia, diversa tupla punti lode
+        :param votoConfronto: oggetto voto
+        :return: true se il voto in input è in conflitto, senno false
+        """
+
+        for v in self.voti:
+            if(v.materia == votoConfronto.materia
+            and not(v.punteggio == votoConfronto.punteggio and
+            v.lode == votoConfronto.lode)):
+                return True
+        return False
+
+
+    def creaMigliorato(self):
+        """
+        Crea un nuovo oggetto libretto in cui i voti sono migliorsti secondo lo schema:
+        se è >=18 e <24 aggiungo 1
+        se è >=24 e <29 aggiungo 2
+        se è 29 aggiungo 1
+        se è 30 rimane 30
+        :return: nuovo oggetto libretto
+        """
+
+        #se creassi un nuovo libretto senza copy, lavorerei sulle stesse istanze
+        #nuovo = Libretto(self.proprietario, [])
+        #creo dei nuovi oggetti voto per ogni voto nel libretto normale.
+        #se facessi una lista copiata non otterrei lo stesso effetto perche lavorerei sulle stesse istanze
+        #for v in self.voti:
+            #non è bello che questo metodo dipenda da tutti gli attributi di Voto,
+            #perche se li cambio sto metodo non funziona piu
+            #quindi creo il metodo copy nella classe voto e libretto
+            #nuovo.append(Voto(v.materia, v.punteggio,v.data, v.lode))
+
+        nuovo = self.copy()
+        #modifico i voti nel nuovo
+        for v in nuovo.voti:
+            if 18 <= v.punteggio <24:
+                v.punteggio += 1
+            elif 24<= v.punteggio <29:
+                v.punteggio += 2
+            elif v.punteggio == 29:
+                v.punteggio = 30
+
+        return nuovo
+
+    def sortByMateria(self):
+        #sfrutto il metodo estraiMateria, è un metodo stand alone(non è un getter)
+        #self.voti.sort(key=estraiMateria)
+        self.voti.sort(key = operator.attrgetter("materia"))
+
+        #per printare:
+        #creo due metodi che si fanno una copia autonoma della lista, la ordinano e la restituiscono
+        #poi un altro metodo che stamperà le nuove liste
+
+
+    def creaLibrOrdinatoPermateria(self):
+        """
+        crea un nuovo oggetto libretto ordinato per materia
+        :return: nuova istanza del libretto
+        """
+        nuovo = self.copy()
+        nuovo.sortByMateria()
+        return nuovo
+
+    def creaLibrOrdinatoPerVoto(self):
+        """
+                crea un nuovo oggetto libretto ordinato per voto
+                :return: nuova istanza del libretto
+        """
+        nuovo = self.copy()
+        nuovo.voti.sort(key = lambda v:(v.punteggio,v.lode), reverse=True)
+        return nuovo
+
+    def cancellaInferiori(self,punteggio):
+        """
+        Agisce sul libretto corrente, eliminando tutti i voti inferiori al parametro punteggio
+        :param punteggio: intero indicante il lower bound
+        :return: oggetto libretto modificato
+        """
+        #modo 1
+        #for i in range(len(self.voti)):
+            #if self.voti[i].punteggio < punteggio:
+                #self.voti.pop(i)
+        #modo 2
+        #for v in self.voti:
+            #if v.punteggio < punteggio:
+                #self.voti.remove(v)
+        #modo 3 ---> devo ciclare ma non posso modificare la lista su cui ciclo
+        nuovo = []
+        for v in self.voti:
+            if v.punteggio >= punteggio:
+                nuovo.append(v)
+        self.voti = nuovo
+
+def estraiMateria(voto):
+    """
+    questo metodo restituisce il campo materia dell'argomento voto
+    :param voto: oggetto voto in input
+    :return: stringa rappresentante il nome
+    """
+    return voto.materia
 
 
 def testVoto():
